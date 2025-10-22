@@ -1,0 +1,355 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    min-height: 100vh;
+    padding: 20px;
+    color: #333;
+}
+
+.container {
+    max-width: 600px;
+    margin: 0 auto;
+}
+
+header {
+    text-align: center;
+    color: white;
+    margin-bottom: 30px;
+}
+
+header h1 {
+    font-size: 2.5rem;
+    margin-bottom: 10px;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.subtitle {
+    font-size: 1.1rem;
+    opacity: 0.9;
+}
+
+.payment-card {
+    background: white;
+    border-radius: 20px;
+    padding: 30px;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+    margin-bottom: 30px;
+}
+
+.wallet-status {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 30px;
+    padding-bottom: 20px;
+    border-bottom: 2px solid #f0f0f0;
+}
+
+#walletStatus {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-weight: 500;
+}
+
+.status-indicator {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background: #dc3545;
+}
+
+.status-connected .status-indicator {
+    background: #28a745;
+    box-shadow: 0 0 10px rgba(40, 167, 69, 0.5);
+}
+
+#walletAddress {
+    font-size: 0.9rem;
+    color: #666;
+}
+
+.btn-primary {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border: none;
+    padding: 12px 24px;
+    border-radius: 10px;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+}
+
+.btn-primary:active {
+    transform: translateY(0);
+}
+
+.btn-primary:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none;
+}
+
+.payment-form {
+    animation: fadeIn 0.5s ease-in;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.form-group {
+    margin-bottom: 20px;
+    position: relative;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 600;
+    color: #333;
+    font-size: 0.9rem;
+}
+
+.form-control {
+    width: 100%;
+    padding: 12px 15px;
+    border: 2px solid #e0e0e0;
+    border-radius: 10px;
+    font-size: 1rem;
+    transition: border-color 0.3s;
+}
+
+.form-control:focus {
+    outline: none;
+    border-color: #667eea;
+}
+
+select.form-control {
+    cursor: pointer;
+    background: white;
+}
+
+.currency-symbol {
+    position: absolute;
+    right: 15px;
+    top: 38px;
+    font-weight: 600;
+    color: #667eea;
+}
+
+.balance-info {
+    background: #f8f9fa;
+    padding: 15px;
+    border-radius: 10px;
+    margin-bottom: 20px;
+}
+
+.balance-info p {
+    margin: 0;
+    color: #666;
+    font-size: 0.95rem;
+}
+
+.balance-info span {
+    font-weight: 600;
+    color: #333;
+}
+
+.btn-send {
+    width: 100%;
+    background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+    color: white;
+    border: none;
+    padding: 15px;
+    border-radius: 10px;
+    font-size: 1.1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.btn-send:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(40, 167, 69, 0.4);
+}
+
+.btn-send:active {
+    transform: translateY(0);
+}
+
+.btn-send:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none;
+}
+
+.transaction-status {
+    margin-top: 20px;
+    padding: 20px;
+    border-radius: 10px;
+    animation: slideIn 0.5s ease-out;
+}
+
+@keyframes slideIn {
+    from {
+        opacity: 0;
+        transform: translateX(-20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+.status-message {
+    font-weight: 600;
+    margin-bottom: 10px;
+}
+
+.transaction-status.success {
+    background: #d4edda;
+    border: 2px solid #28a745;
+}
+
+.transaction-status.success .status-message {
+    color: #155724;
+}
+
+.transaction-status.error {
+    background: #f8d7da;
+    border: 2px solid #dc3545;
+}
+
+.transaction-status.error .status-message {
+    color: #721c24;
+}
+
+.transaction-status.pending {
+    background: #fff3cd;
+    border: 2px solid #ffc107;
+}
+
+.transaction-status.pending .status-message {
+    color: #856404;
+}
+
+.transaction-hash {
+    margin-top: 15px;
+}
+
+.transaction-hash p {
+    font-size: 0.9rem;
+    color: #666;
+    margin-bottom: 5px;
+}
+
+.transaction-hash a {
+    color: #667eea;
+    text-decoration: none;
+    word-break: break-all;
+    font-family: monospace;
+    font-size: 0.85rem;
+}
+
+.transaction-hash a:hover {
+    text-decoration: underline;
+}
+
+.info-section {
+    background: white;
+    border-radius: 20px;
+    padding: 30px;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+    margin-bottom: 30px;
+}
+
+.info-section h3 {
+    margin-bottom: 20px;
+    color: #333;
+    text-align: center;
+}
+
+.currency-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 15px;
+}
+
+.currency-item {
+    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+    padding: 20px;
+    border-radius: 15px;
+    text-align: center;
+    transition: transform 0.2s;
+}
+
+.currency-item:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+}
+
+.currency-icon {
+    font-size: 2.5rem;
+    margin-bottom: 10px;
+}
+
+.currency-name {
+    font-weight: 600;
+    color: #333;
+    margin-bottom: 5px;
+}
+
+.currency-code {
+    color: #666;
+    font-size: 0.9rem;
+}
+
+footer {
+    text-align: center;
+    color: white;
+    opacity: 0.9;
+    font-size: 0.9rem;
+}
+
+@media (max-width: 768px) {
+    header h1 {
+        font-size: 2rem;
+    }
+
+    .payment-card {
+        padding: 20px;
+    }
+
+    .wallet-status {
+        flex-direction: column;
+        gap: 15px;
+    }
+
+    .btn-primary {
+        width: 100%;
+    }
+
+    .currency-grid {
+        grid-template-columns: 1fr;
+    }
+}

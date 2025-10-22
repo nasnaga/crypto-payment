@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Crypto Payment Gateway</title>
+    <link rel="icon" type="image/svg+xml" href="favicon.svg">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Crypto Payment Gateway</h1>
+            <p class="subtitle">Pay with Phantom Wallet</p>
+        </header>
+
+        <div class="payment-card">
+            <div class="wallet-status">
+                <div id="walletStatus" class="status-disconnected">
+                    <span class="status-indicator"></span>
+                    <span id="walletAddress">Not Connected</span>
+                </div>
+                <button id="connectWallet" class="btn-primary">Connect Phantom Wallet</button>
+            </div>
+
+            <div class="payment-form" id="paymentForm" style="display: none;">
+                <div class="form-group">
+                    <label for="currency">Select Currency</label>
+                    <select id="currency" class="form-control">
+                        <option value="SOL">Solana (SOL)</option>
+                        <option value="ETH">Ethereum (ETH)</option>
+                        <option value="BTC">Bitcoin (BTC)</option>
+                        <option value="USDC">USD Coin (USDC)</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="amount">Amount</label>
+                    <input type="number" id="amount" class="form-control" placeholder="0.00" step="0.000001" min="0">
+                    <span class="currency-symbol" id="currencySymbol">SOL</span>
+                </div>
+
+                <div class="form-group">
+                    <label for="recipientAddress">Recipient Address</label>
+                    <input type="text" id="recipientAddress" class="form-control" placeholder="Enter recipient address">
+                </div>
+
+                <div class="balance-info" id="balanceInfo" style="display: none;">
+                    <p>Available Balance: <span id="balance">0</span> <span id="balanceCurrency">SOL</span></p>
+                </div>
+
+                <button id="sendPayment" class="btn-send">Send Payment</button>
+            </div>
+
+            <div class="transaction-status" id="transactionStatus" style="display: none;">
+                <div class="status-message" id="statusMessage"></div>
+                <div class="transaction-hash" id="transactionHash" style="display: none;">
+                    <p>Transaction Hash:</p>
+                    <a id="txHashLink" href="#" target="_blank" rel="noopener noreferrer"></a>
+                </div>
+            </div>
+        </div>
+
+        <div class="info-section">
+            <h3>Supported Currencies</h3>
+            <div class="currency-grid">
+                <div class="currency-item">
+                    <div class="currency-icon">◎</div>
+                    <div class="currency-name">Solana</div>
+                    <div class="currency-code">SOL</div>
+                </div>
+                <div class="currency-item">
+                    <div class="currency-icon">Ξ</div>
+                    <div class="currency-name">Ethereum</div>
+                    <div class="currency-code">ETH</div>
+                </div>
+                <div class="currency-item">
+                    <div class="currency-icon">₿</div>
+                    <div class="currency-name">Bitcoin</div>
+                    <div class="currency-code">BTC</div>
+                </div>
+                <div class="currency-item">
+                    <div class="currency-icon">$</div>
+                    <div class="currency-name">USD Coin</div>
+                    <div class="currency-code">USDC</div>
+                </div>
+            </div>
+        </div>
+
+        <footer>
+            <p>Powered by Phantom Wallet | Secure Crypto Payments</p>
+        </footer>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>

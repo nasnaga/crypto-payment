@@ -1,0 +1,30 @@
+{
+  "name": "crypto-payment",
+  "version": "1.0.0",
+  "description": "A cryptocurrency payment gateway supporting Phantom wallet with ETH, Bitcoin, Solana, and USDC",
+  "main": "index.html",
+  "scripts": {
+    "start": "npx http-server -p 8080 -o",
+    "dev": "npx live-server --port=8080 --open=index.html"
+  },
+  "keywords": [
+    "crypto",
+    "payment",
+    "phantom",
+    "wallet",
+    "solana",
+    "ethereum",
+    "bitcoin",
+    "usdc"
+  ],
+  "author": "nasnaga",
+  "license": "MIT",
+  "dependencies": {
+    "@solana/spl-token": "^0.1.8",
+    "@solana/web3.js": "^1.87.0"
+  },
+  "devDependencies": {
+    "http-server": "^14.1.1",
+    "live-server": "^1.2.0"
+  }
+}
