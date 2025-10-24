@@ -233,6 +233,139 @@ select.form-control {
   transform: none;
 }
 
+.payment-actions {
+  display: flex;
+  gap: 0.625rem;
+  flex-direction: column;
+}
+
+.btn-secondary {
+  width: 100%;
+  background: linear-gradient(135deg, #6c757d 0%, #5a6268 100%);
+  color: white;
+  border: none;
+  padding: 0.75rem;
+  border-radius: 0.625rem;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.btn-secondary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 5px 15px rgba(108, 117, 125, 0.4);
+}
+
+.btn-secondary:active {
+  transform: translateY(0);
+}
+
+.btn-secondary:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.payment-link-modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  animation: fadeIn 0.3s ease-in;
+}
+
+.payment-link-content {
+  background: white;
+  border-radius: 1.25rem;
+  padding: 1.875rem;
+  max-width: 500px;
+  width: 90%;
+  max-height: 90vh;
+  overflow-y: auto;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+}
+
+.payment-link-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.25rem;
+  padding-bottom: 0.9375rem;
+  border-bottom: 2px solid #f0f0f0;
+}
+
+.payment-link-header h3 {
+  margin: 0;
+  font-size: 1.5rem;
+  color: #333;
+}
+
+.close-modal {
+  background: none;
+  border: none;
+  font-size: 1.5rem;
+  cursor: pointer;
+  color: #666;
+  padding: 0;
+  width: 2rem;
+  height: 2rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  transition: background 0.2s;
+}
+
+.close-modal:hover {
+  background: #f0f0f0;
+}
+
+.payment-link-url {
+  background: #f8f9fa;
+  border: 2px solid #e0e0e0;
+  border-radius: 0.625rem;
+  padding: 0.9375rem;
+  word-break: break-all;
+  font-family: monospace;
+  font-size: 0.85rem;
+  margin-bottom: 1.25rem;
+  color: #333;
+}
+
+.payment-link-actions {
+  display: flex;
+  gap: 0.625rem;
+}
+
+.btn-copy {
+  flex: 1;
+  background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-dark) 100%);
+  color: white;
+  border: none;
+  padding: 0.75rem;
+  border-radius: 0.625rem;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.btn-copy:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+}
+
+.btn-copy:active {
+  transform: translateY(0);
+}
+
 .transaction-status {
   margin-top: 1.25rem;
   padding: 1.25rem;

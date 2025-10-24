@@ -91,7 +91,10 @@
                     <p>Available Balance: <span id="balance">0</span> <span id="balanceCurrency">SOL</span></p>
                 </div>
 
-                <button id="sendPayment" class="btn-send">Send Payment</button>
+                <div class="payment-actions">
+                    <button id="sendPayment" class="btn-send">Send Payment</button>
+                    <button type="button" id="createPaymentLink" class="btn-secondary">📤 Create Payment Link</button>
+                </div>
             </div>
 
             <div class="transaction-status" id="transactionStatus" style="display: none;">
@@ -132,6 +135,21 @@
         <footer>
             <p>Powered by Phantom Wallet | Secure Crypto Payments</p>
         </footer>
+    </div>
+
+    <!-- Payment Link Modal -->
+    <div id="paymentLinkModal" class="payment-link-modal" style="display: none;">
+        <div class="payment-link-content">
+            <div class="payment-link-header">
+                <h3>Payment Link</h3>
+                <button class="close-modal" onclick="window.app.closePaymentLinkModal()">×</button>
+            </div>
+            <p style="margin-bottom: 1rem; color: #666;">Share this link to request payment:</p>
+            <div id="paymentLinkUrl" class="payment-link-url"></div>
+            <div class="payment-link-actions">
+                <button class="btn-copy" onclick="window.app.copyPaymentLink()">📋 Copy Link</button>
+            </div>
+        </div>
     </div>
 
     <script type="module" src="/src/main.js"></script>

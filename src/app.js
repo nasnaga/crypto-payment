@@ -29,6 +29,7 @@ class CryptoPaymentApp {
     init() {
         this.setupEventListeners();
         this.checkPhantomWallet();
+        this.parsePaymentLinkParams();
     }
 
     setupEventListeners() {
@@ -38,6 +39,7 @@ class CryptoPaymentApp {
         document.getElementById('splToken').addEventListener('change', (e) => this.onSPLTokenChange(e));
         document.getElementById('erc20Token').addEventListener('change', (e) => this.onERC20TokenChange(e));
         document.getElementById('feeSpeed').addEventListener('change', (e) => this.onFeeSpeedChange(e));
+        document.getElementById('createPaymentLink').addEventListener('click', () => this.createPaymentLink());
     }
 
     checkPhantomWallet() {
@@ -186,6 +188,13 @@ class CryptoPaymentApp {
         paymentForm.style.display = 'block';
 
         this.getBalance();
+
+        // Apply payment link parameters if present
+        if (this.pendingPaymentParams) {
+            setTimeout(() => {
+                this.applyPaymentLinkParams();
+            }, 500);
+        }
     }
 
     handleWalletDisconnected() {
@@ -757,6 +766,142 @@ class CryptoPaymentApp {
             setTimeout(() => {
                 statusDiv.style.display = 'none';
             }, 10000);
+        }
+    }
+
+    parsePaymentLinkParams() {
+        // Parse URL parameters on page load
+        const urlParams = new URLSearchParams(window.location.search);
+
+        const recipient = urlParams.get('recipient');
+        const amount = urlParams.get('amount');
+        const currency = urlParams.get('currency');
+        const token = urlParams.get('token');
+
+        // If payment link parameters are present, show a notification
+        if (recipient || amount || currency) {
+            // Wait for wallet connection before auto-filling
+            // We'll auto-fill after user connects wallet
+            this.pendingPaymentParams = {
+                recipient,
+                amount,
+                currency,
+                token
+            };
+
+            // Show notification
+            setTimeout(() => {
+                this.showStatus('pending', 'Payment request detected. Connect wallet to continue.');
+            }, 1000);
+        }
+    }
+
+    applyPaymentLinkParams() {
+        if (!this.pendingPaymentParams) return;
+
+        const { recipient, amount, currency, token } = this.pendingPaymentParams;
+
+        // Set currency/network
+        if (currency) {
+            document.getElementById('currency').value = currency;
+            this.currentNetwork = currency;
+            this.onCurrencyChange({ target: { value: currency } });
+        }
+
+        // Set token if specified
+        if (token) {
+            if (currency === 'SOL') {
+                document.getElementById('splToken').value = token;
+                this.onSPLTokenChange({ target: { value: token } });
+            } else if (currency === 'ETH' || currency === 'POLYGON' || currency === 'BASE') {
+                document.getElementById('erc20Token').value = token;
+                this.onERC20TokenChange({ target: { value: token } });
+            }
+        }
+
+        // Set amount
+        if (amount) {
+            document.getElementById('amount').value = amount;
+        }
+
+        // Set recipient
+        if (recipient) {
+            document.getElementById('recipientAddress').value = recipient;
+        }
+
+        // Clear pending params
+        this.pendingPaymentParams = null;
+
+        // Show success message
+        this.showStatus('success', 'Payment request loaded successfully!');
+    }
+
+    createPaymentLink() {
+        try {
+            const amount = document.getElementById('amount').value;
+            const recipient = document.getElementById('recipientAddress').value;
+            const currency = document.getElementById('currency').value;
+
+            // Validation
+            if (!recipient) {
+                this.showStatus('error', 'Please enter a recipient address to create payment link');
+                return;
+            }
+
+            if (!amount || parseFloat(amount) <= 0) {
+                this.showStatus('error', 'Please enter a valid amount to create payment link');
+                return;
+            }
+
+            // Build payment link URL
+            const baseUrl = window.location.origin + window.location.pathname;
+            const params = new URLSearchParams({
+                recipient,
+                amount,
+                currency
+            });
+
+            // Add token parameter if a token is selected
+            if (currency === 'SOL' && this.selectedSPLToken) {
+                params.append('token', this.selectedSPLToken.symbol);
+            } else if ((currency === 'ETH' || currency === 'POLYGON' || currency === 'BASE') && this.selectedERC20Token) {
+                params.append('token', this.selectedERC20Token);
+            }
+
+            const paymentLink = `${baseUrl}?${params.toString()}`;
+
+            // Store link for copying
+            this.currentPaymentLink = paymentLink;
+
+            // Display in modal
+            document.getElementById('paymentLinkUrl').textContent = paymentLink;
+            document.getElementById('paymentLinkModal').style.display = 'flex';
+
+        } catch (error) {
+            console.error('Error creating payment link:', error);
+            this.showStatus('error', 'Failed to create payment link: ' + error.message);
+        }
+    }
+
+    closePaymentLinkModal() {
+        document.getElementById('paymentLinkModal').style.display = 'none';
+    }
+
+    async copyPaymentLink() {
+        try {
+            await navigator.clipboard.writeText(this.currentPaymentLink);
+
+            // Show success feedback
+            const copyBtn = document.querySelector('.btn-copy');
+            const originalText = copyBtn.textContent;
+            copyBtn.textContent = '✓ Copied!';
+
+            setTimeout(() => {
+                copyBtn.textContent = originalText;
+            }, 2000);
+        } catch (error) {
+            console.error('Error copying to clipboard:', error);
+            alert('Failed to copy link. Please copy manually.');
         }
     }
 }
