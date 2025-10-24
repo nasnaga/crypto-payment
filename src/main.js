@@ -6,8 +6,6 @@ import { CryptoPaymentApp } from './app.js';
 document.addEventListener('DOMContentLoaded', () => {
   const app = new CryptoPaymentApp();
 
-  // Expose app instance globally for debugging (optional)
-  if (import.meta.env.DEV) {
-    window.app = app;
-  }
+  // Expose app instance globally for onclick handlers
+  window.app = app;
 });

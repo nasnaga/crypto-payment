@@ -72,7 +72,12 @@
 
                 <div class="form-group">
                     <label for="recipientAddress">Recipient Address</label>
-                    <input type="text" id="recipientAddress" class="form-control" placeholder="Enter recipient address">
+                    <div class="recipient-input-group">
+                        <input type="text" id="recipientAddress" class="form-control" placeholder="Enter recipient address">
+                        <button type="button" id="openAddressBook" class="btn-address-book" title="Address Book">
+                            📕
+                        </button>
+                    </div>
                 </div>
 
                 <div class="form-group" id="feeCustomization" style="display: none;">
@@ -132,6 +137,72 @@
         <footer>
             <p>Powered by Phantom Wallet | Secure Crypto Payments</p>
         </footer>
+    </div>
+
+    <!-- Address Book Modal -->
+    <div id="addressBookModal" class="modal" style="display: none;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Address Book</h3>
+                <button class="modal-close" id="closeAddressBook">&times;</button>
+            </div>
+
+            <div class="modal-body">
+                <div class="address-book-actions">
+                    <input type="text" id="searchContacts" class="form-control" placeholder="Search contacts...">
+                    <button id="addNewContact" class="btn-primary">+ Add Contact</button>
+                </div>
+
+                <div id="contactsList" class="contacts-list">
+                    <p class="no-contacts">No contacts yet</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add/Edit Contact Modal -->
+    <div id="contactModal" class="modal" style="display: none;">
+        <div class="modal-content modal-small">
+            <div class="modal-header">
+                <h3 id="contactModalTitle">Add Contact</h3>
+                <button class="modal-close" id="closeContactModal">&times;</button>
+            </div>
+
+            <div class="modal-body">
+                <form id="contactForm">
+                    <div class="form-group">
+                        <label for="contactName">Name *</label>
+                        <input type="text" id="contactName" class="form-control" placeholder="Contact name" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="contactNetwork">Network *</label>
+                        <select id="contactNetwork" class="form-control" required>
+                            <option value="SOL">Solana</option>
+                            <option value="ETH">Ethereum</option>
+                            <option value="POLYGON">Polygon</option>
+                            <option value="BASE">Base</option>
+                            <option value="BTC">Bitcoin</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="contactAddress">Wallet Address *</label>
+                        <input type="text" id="contactAddress" class="form-control" placeholder="Wallet address" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="contactNotes">Notes (optional)</label>
+                        <textarea id="contactNotes" class="form-control" placeholder="Additional notes" rows="3"></textarea>
+                    </div>
+
+                    <div class="modal-actions">
+                        <button type="button" id="cancelContact" class="btn-secondary">Cancel</button>
+                        <button type="submit" id="saveContact" class="btn-primary">Save Contact</button>
+                    </div>
+                </form>
+            </div>
+        </div>
     </div>
 
     <script type="module" src="/src/main.js"></script>
