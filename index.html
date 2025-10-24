@@ -103,6 +103,40 @@
             </div>
         </div>
 
+        <div class="receive-section" id="receiveSection" style="display: none;">
+            <h3>Receive Payment</h3>
+            <p class="receive-subtitle">Share this QR code or address to receive payments</p>
+
+            <div class="receive-content">
+                <div class="qr-code-container">
+                    <canvas id="qrCodeCanvas"></canvas>
+                </div>
+
+                <div class="receive-details">
+                    <div class="form-group">
+                        <label for="receiveNetwork">Select Network</label>
+                        <select id="receiveNetwork" class="form-control">
+                            <option value="SOL">Solana</option>
+                            <option value="ETH">Ethereum</option>
+                            <option value="POLYGON">Polygon</option>
+                            <option value="BASE">Base</option>
+                            <option value="BTC">Bitcoin</option>
+                        </select>
+                    </div>
+
+                    <div class="receive-address-container">
+                        <label>Your Wallet Address:</label>
+                        <div class="address-display">
+                            <input type="text" id="receiveAddress" readonly class="form-control">
+                            <button id="copyAddress" class="btn-copy" title="Copy to clipboard">
+                                📋 Copy
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <div class="info-section">
             <h3>Supported Currencies</h3>
             <div class="currency-grid">
