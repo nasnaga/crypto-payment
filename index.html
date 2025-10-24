@@ -4,8 +4,12 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Crypto Payment Gateway</title>
-    <link rel="icon" type="image/svg+xml" href="favicon.svg">
-    <link rel="stylesheet" href="styles.css">
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+    <link rel="stylesheet" href="/src/styles/main.css">
+    <script type="module">
+        import { Buffer } from 'buffer';
+        window.Buffer = Buffer;
+    </script>
 </head>
 <body>
     <div class="container">
@@ -25,12 +29,38 @@
 
             <div class="payment-form" id="paymentForm" style="display: none;">
                 <div class="form-group">
-                    <label for="currency">Select Currency</label>
+                    <label for="currency">Select Network</label>
                     <select id="currency" class="form-control">
-                        <option value="SOL">Solana (SOL)</option>
-                        <option value="ETH">Ethereum (ETH)</option>
-                        <option value="BTC">Bitcoin (BTC)</option>
-                        <option value="USDC">USD Coin (USDC)</option>
+                        <option value="SOL">Solana</option>
+                        <option value="ETH">Ethereum</option>
+                        <option value="POLYGON">Polygon</option>
+                        <option value="BASE">Base</option>
+                        <option value="BTC">Bitcoin</option>
+                    </select>
+                </div>
+
+                <div class="form-group" id="splTokenSection" style="display: none;">
+                    <label for="splToken">Select SPL Token</label>
+                    <select id="splToken" class="form-control">
+                        <option value="">Select a token...</option>
+                        <option value="USDC">USDC - USD Coin</option>
+                        <option value="USDT">USDT - Tether USD</option>
+                        <option value="BONK">BONK - Bonk</option>
+                        <option value="RAY">RAY - Raydium</option>
+                        <option value="ORCA">ORCA - Orca</option>
+                        <option value="JUP">JUP - Jupiter</option>
+                    </select>
+                </div>
+
+                <div class="form-group" id="erc20TokenSection" style="display: none;">
+                    <label for="erc20Token">Select ERC-20 Token</label>
+                    <select id="erc20Token" class="form-control">
+                        <option value="">Select a token...</option>
+                        <option value="USDT">USDT - Tether USD</option>
+                        <option value="USDC">USDC - USD Coin</option>
+                        <option value="DAI">DAI - Dai Stablecoin</option>
+                        <option value="LINK">LINK - Chainlink</option>
+                        <option value="UNI">UNI - Uniswap</option>
                     </select>
                 </div>
 
@@ -43,6 +73,18 @@
                 <div class="form-group">
                     <label for="recipientAddress">Recipient Address</label>
                     <input type="text" id="recipientAddress" class="form-control" placeholder="Enter recipient address">
+                </div>
+
+                <div class="form-group" id="feeCustomization" style="display: none;">
+                    <label for="feeSpeed">Transaction Speed</label>
+                    <select id="feeSpeed" class="form-control">
+                        <option value="slow">Slow (Lower Fee)</option>
+                        <option value="medium" selected>Medium (Standard)</option>
+                        <option value="fast">Fast (Higher Fee)</option>
+                    </select>
+                    <div id="feeEstimate" style="margin-top: 8px; font-size: 0.875rem; color: #6b7280;">
+                        <span id="feeAmount">Estimating...</span>
+                    </div>
                 </div>
 
                 <div class="balance-info" id="balanceInfo" style="display: none;">
@@ -92,6 +134,6 @@
         </footer>
     </div>
 
-    <script src="app.js"></script>
+    <script type="module" src="/src/main.js"></script>
 </body>
 </html>
