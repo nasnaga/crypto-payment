@@ -4,6 +4,7 @@ import { splTokenService } from './services/splTokenService.js';
 import { erc20TokenService } from './services/erc20TokenService.js';
 import { feeService } from './services/feeService.js';
 import { transactionHistoryService } from './services/transactionHistoryService.js';
+import { i18nService } from './i18n/i18nService.js';
 import { Connection, PublicKey, Transaction, SystemProgram, LAMPORTS_PER_SOL } from '@solana/web3.js';
 import { getAssociatedTokenAddress, createTransferInstruction } from '@solana/spl-token';
 import { NETWORK_CONFIG, ACTIVE_NETWORKS, TOKENS, SPL_TOKENS, ERC20_TOKENS, EXPLORERS } from './config.js';
@@ -28,6 +29,7 @@ class CryptoPaymentApp {
     }
 
     init() {
+        i18nService.init();
         this.setupEventListeners();
         this.checkPhantomWallet();
     }
@@ -44,6 +46,11 @@ class CryptoPaymentApp {
         document.getElementById('historyNetworkFilter').addEventListener('change', (e) => this.filterTransactions());
         document.getElementById('historyStatusFilter').addEventListener('change', (e) => this.filterTransactions());
         document.getElementById('clearHistory').addEventListener('click', () => this.clearTransactionHistory());
+
+        // Language selector
+        const languageSelector = document.getElementById('languageSelector');
+        languageSelector.value = i18nService.getCurrentLanguage();
+        languageSelector.addEventListener('change', (e) => this.changeLanguage(e.target.value));
     }
 
     checkPhantomWallet() {
@@ -88,21 +95,21 @@ class CryptoPaymentApp {
                 this.handleWalletConnected('SOL');
             }
         } else {
-            this.showStatus('error', 'Phantom wallet not found. Please install Phantom wallet extension.');
+            this.showStatus('error', i18nService.translate('phantomNotFound'));
         }
     }
 
     async connectWallet() {
         try {
             if (!this.solanaProvider && !this.ethereumProvider && !this.bitcoinProvider) {
-                alert('Please install Phantom wallet extension!');
+                alert(i18nService.translate('installPhantom'));
                 window.open('https://phantom.app/', '_blank');
                 return;
             }
 
             const connectBtn = document.getElementById('connectWallet');
             connectBtn.disabled = true;
-            connectBtn.textContent = 'Connecting...';
+            connectBtn.textContent = i18nService.translate('connecting');
 
             // Try to connect all available providers
             const connectionPromises = [];
@@ -166,11 +173,11 @@ class CryptoPaymentApp {
 
         } catch (error) {
             console.error('Connection error:', error);
-            this.showStatus('error', 'Failed to connect wallet: ' + error.message);
+            this.showStatus('error', i18nService.translate('connectionFailed') + ': ' + error.message);
 
             const connectBtn = document.getElementById('connectWallet');
             connectBtn.disabled = false;
-            connectBtn.textContent = 'Connect Phantom Wallet';
+            connectBtn.textContent = i18nService.translate('connectWallet');
         }
     }
 
@@ -186,7 +193,7 @@ class CryptoPaymentApp {
 
         const currentAddress = this.walletAddresses[this.currentNetwork];
         walletAddress.textContent = this.formatAddress(currentAddress);
-        connectBtn.textContent = 'Connected';
+        connectBtn.textContent = i18nService.translate('connected');
         connectBtn.disabled = true;
 
         paymentForm.style.display = 'block';
@@ -210,15 +217,15 @@ class CryptoPaymentApp {
         walletStatus.classList.remove('status-connected');
         walletStatus.classList.add('status-disconnected');
 
-        walletAddress.textContent = 'Not Connected';
-        connectBtn.textContent = 'Connect Phantom Wallet';
+        walletAddress.textContent = i18nService.translate('notConnected');
+        connectBtn.textContent = i18nService.translate('connectWallet');
         connectBtn.disabled = false;
 
         paymentForm.style.display = 'none';
     }
 
     formatAddress(address) {
-        if (!address) return 'Not Connected';
+        if (!address) return i18nService.translate('notConnected');
         return `${address.substring(0, 4)}...${address.substring(address.length - 4)}`;
     }
 
@@ -446,20 +453,20 @@ class CryptoPaymentApp {
 
             // Validation
             if (!amount || parseFloat(amount) <= 0) {
-                this.showStatus('error', 'Please enter a valid amount');
+                this.showStatus('error', i18nService.translate('invalidAmount'));
                 return;
             }
 
             if (!recipient) {
-                this.showStatus('error', 'Please enter a recipient address');
+                this.showStatus('error', i18nService.translate('invalidRecipient'));
                 return;
             }
 
             const sendBtn = document.getElementById('sendPayment');
             sendBtn.disabled = true;
-            sendBtn.textContent = 'Processing...';
+            sendBtn.textContent = i18nService.translate('processing');
 
-            this.showStatus('pending', 'Preparing transaction...');
+            this.showStatus('pending', i18nService.translate('preparingTransaction'));
 
             // Handle different currencies and tokens
             let txHash;
@@ -500,11 +507,11 @@ class CryptoPaymentApp {
                         txHash = await this.sendBitcoin(recipient, amount);
                         break;
                     default:
-                        throw new Error('Unsupported currency');
+                        throw new Error(i18nService.translate('unsupportedCurrency'));
                 }
             }
 
-            this.showStatus('success', 'Payment sent successfully!', txHash);
+            this.showStatus('success', i18nService.translate('paymentSuccess'), txHash);
 
             // Save transaction to history
             await this.saveTransactionToHistory({
@@ -534,15 +541,15 @@ class CryptoPaymentApp {
             this.loadTransactionHistory();
 
             sendBtn.disabled = false;
-            sendBtn.textContent = 'Send Payment';
+            sendBtn.textContent = i18nService.translate('sendPayment');
 
         } catch (error) {
             console.error('Payment error:', error);
-            this.showStatus('error', 'Payment failed: ' + error.message);
+            this.showStatus('error', i18nService.translate('paymentFailed') + ': ' + error.message);
 
             const sendBtn = document.getElementById('sendPayment');
             sendBtn.disabled = false;
-            sendBtn.textContent = 'Send Payment';
+            sendBtn.textContent = i18nService.translate('sendPayment');
         }
     }
 
@@ -596,7 +603,7 @@ class CryptoPaymentApp {
 
         } catch (error) {
             if (error.message.includes('User rejected') || error.code === 4001) {
-                throw new Error('Transaction cancelled by user');
+                throw new Error(i18nService.translate('transactionCancelled'));
             }
             throw new Error('Solana transaction failed: ' + error.message);
         }
@@ -636,7 +643,7 @@ class CryptoPaymentApp {
 
         } catch (error) {
             if (error.code === 4001) {
-                throw new Error('Transaction cancelled by user');
+                throw new Error(i18nService.translate('transactionCancelled'));
             }
             throw new Error('Ethereum transaction failed: ' + error.message);
         }
@@ -662,7 +669,7 @@ class CryptoPaymentApp {
 
         } catch (error) {
             if (error.message.includes('User rejected')) {
-                throw new Error('Transaction cancelled by user');
+                throw new Error(i18nService.translate('transactionCancelled'));
             }
             throw new Error('Bitcoin transaction failed: ' + error.message);
         }
@@ -727,7 +734,7 @@ class CryptoPaymentApp {
 
         } catch (error) {
             if (error.message.includes('User rejected') || error.code === 4001) {
-                throw new Error('Transaction cancelled by user');
+                throw new Error(i18nService.translate('transactionCancelled'));
             }
             throw new Error('USDC transaction failed: ' + error.message);
         }
@@ -838,18 +845,18 @@ class CryptoPaymentApp {
                             ${parseFloat(tx.amount).toFixed(6)} ${tx.currency}
                         </div>
                         <div class="transaction-badge ${statusClass}">
-                            ${tx.status}
+                            ${i18nService.translate(tx.status)}
                         </div>
                     </div>
                     <div class="transaction-details">
-                        <strong>Network:</strong> ${tx.network}
+                        <strong>${i18nService.translate('network')}:</strong> ${tx.network}
                     </div>
                     <div class="transaction-details">
                         <strong>To:</strong> ${this.formatAddress(tx.recipient)}
                     </div>
                     ${tx.explorerUrl ? `
                         <a href="${tx.explorerUrl}" target="_blank" rel="noopener noreferrer" class="transaction-hash">
-                            View on Explorer: ${tx.txHash.substring(0, 8)}...${tx.txHash.substring(tx.txHash.length - 8)}
+                            ${i18nService.translate('viewOnExplorer')}: ${tx.txHash.substring(0, 8)}...${tx.txHash.substring(tx.txHash.length - 8)}
                         </a>
                     ` : ''}
                     <div class="transaction-timestamp">
@@ -886,7 +893,7 @@ class CryptoPaymentApp {
     }
 
     async clearTransactionHistory() {
-        if (confirm('Are you sure you want to clear all transaction history?')) {
+        if (confirm(i18nService.translate('clearHistoryConfirm'))) {
             try {
                 await transactionHistoryService.clearAllTransactions();
                 this.loadTransactionHistory();
@@ -895,6 +902,38 @@ class CryptoPaymentApp {
                 console.error('Error clearing transaction history:', error);
                 alert('Failed to clear transaction history');
             }
+        }
+    }
+
+    changeLanguage(lang) {
+        i18nService.setLanguage(lang);
+
+        // Update button texts that might have been changed dynamically
+        const connectBtn = document.getElementById('connectWallet');
+        const sendBtn = document.getElementById('sendPayment');
+        const walletAddress = document.getElementById('walletAddress');
+
+        // Update wallet button based on connection status
+        if (this.walletAddresses[this.currentNetwork]) {
+            connectBtn.textContent = i18nService.translate('connected');
+            walletAddress.textContent = this.formatAddress(this.walletAddresses[this.currentNetwork]);
+        } else {
+            connectBtn.textContent = i18nService.translate('connectWallet');
+            walletAddress.textContent = i18nService.translate('notConnected');
+        }
+
+        // Update send button
+        sendBtn.textContent = i18nService.translate('sendPayment');
+
+        // Update fee estimate text if visible
+        const feeAmount = document.getElementById('feeAmount');
+        if (feeAmount && feeAmount.textContent.includes('Estimating')) {
+            feeAmount.textContent = i18nService.translate('estimating');
+        }
+
+        // Reload transaction history with translated text
+        if (document.getElementById('transactionHistorySection').style.display !== 'none') {
+            this.loadTransactionHistory();
         }
     }
 }
