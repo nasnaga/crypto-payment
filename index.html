@@ -14,35 +14,44 @@
 <body>
     <div class="container">
         <header>
-            <h1>Crypto Payment Gateway</h1>
-            <p class="subtitle">Pay with Phantom Wallet</p>
+            <div class="header-top">
+                <select id="languageSelector" class="language-selector">
+                    <option value="en">English</option>
+                    <option value="es">Español</option>
+                    <option value="fr">Français</option>
+                    <option value="ja">日本語</option>
+                    <option value="zh">中文</option>
+                </select>
+            </div>
+            <h1 data-i18n="appTitle">Crypto Payment Gateway</h1>
+            <p class="subtitle" data-i18n="appSubtitle">Pay with Phantom Wallet</p>
         </header>
 
         <div class="payment-card">
             <div class="wallet-status">
                 <div id="walletStatus" class="status-disconnected">
                     <span class="status-indicator"></span>
-                    <span id="walletAddress">Not Connected</span>
+                    <span id="walletAddress" data-i18n="notConnected">Not Connected</span>
                 </div>
-                <button id="connectWallet" class="btn-primary">Connect Phantom Wallet</button>
+                <button id="connectWallet" class="btn-primary" data-i18n="connectWallet">Connect Phantom Wallet</button>
             </div>
 
             <div class="payment-form" id="paymentForm" style="display: none;">
                 <div class="form-group">
-                    <label for="currency">Select Network</label>
+                    <label for="currency" data-i18n="selectNetwork">Select Network</label>
                     <select id="currency" class="form-control">
-                        <option value="SOL">Solana</option>
-                        <option value="ETH">Ethereum</option>
-                        <option value="POLYGON">Polygon</option>
-                        <option value="BASE">Base</option>
-                        <option value="BTC">Bitcoin</option>
+                        <option value="SOL" data-i18n="solana">Solana</option>
+                        <option value="ETH" data-i18n="ethereum">Ethereum</option>
+                        <option value="POLYGON" data-i18n="polygon">Polygon</option>
+                        <option value="BASE" data-i18n="base">Base</option>
+                        <option value="BTC" data-i18n="bitcoin">Bitcoin</option>
                     </select>
                 </div>
 
                 <div class="form-group" id="splTokenSection" style="display: none;">
-                    <label for="splToken">Select SPL Token</label>
+                    <label for="splToken" data-i18n="selectSPLToken">Select SPL Token</label>
                     <select id="splToken" class="form-control">
-                        <option value="">Select a token...</option>
+                        <option value="" data-i18n="selectToken">Select a token...</option>
                         <option value="USDC">USDC - USD Coin</option>
                         <option value="USDT">USDT - Tether USD</option>
                         <option value="BONK">BONK - Bonk</option>
@@ -53,9 +62,9 @@
                 </div>
 
                 <div class="form-group" id="erc20TokenSection" style="display: none;">
-                    <label for="erc20Token">Select ERC-20 Token</label>
+                    <label for="erc20Token" data-i18n="selectERC20Token">Select ERC-20 Token</label>
                     <select id="erc20Token" class="form-control">
-                        <option value="">Select a token...</option>
+                        <option value="" data-i18n="selectToken">Select a token...</option>
                         <option value="USDT">USDT - Tether USD</option>
                         <option value="USDC">USDC - USD Coin</option>
                         <option value="DAI">DAI - Dai Stablecoin</option>
@@ -65,100 +74,100 @@
                 </div>
 
                 <div class="form-group">
-                    <label for="amount">Amount</label>
+                    <label for="amount" data-i18n="amount">Amount</label>
                     <input type="number" id="amount" class="form-control" placeholder="0.00" step="0.000001" min="0">
                     <span class="currency-symbol" id="currencySymbol">SOL</span>
                 </div>
 
                 <div class="form-group">
-                    <label for="recipientAddress">Recipient Address</label>
-                    <input type="text" id="recipientAddress" class="form-control" placeholder="Enter recipient address">
+                    <label for="recipientAddress" data-i18n="recipientAddress">Recipient Address</label>
+                    <input type="text" id="recipientAddress" class="form-control" data-i18n-placeholder="enterRecipient" placeholder="Enter recipient address">
                 </div>
 
                 <div class="form-group" id="feeCustomization" style="display: none;">
-                    <label for="feeSpeed">Transaction Speed</label>
+                    <label for="feeSpeed" data-i18n="transactionSpeed">Transaction Speed</label>
                     <select id="feeSpeed" class="form-control">
-                        <option value="slow">Slow (Lower Fee)</option>
-                        <option value="medium" selected>Medium (Standard)</option>
-                        <option value="fast">Fast (Higher Fee)</option>
+                        <option value="slow" data-i18n="speedSlow">Slow (Lower Fee)</option>
+                        <option value="medium" selected data-i18n="speedMedium">Medium (Standard)</option>
+                        <option value="fast" data-i18n="speedFast">Fast (Higher Fee)</option>
                     </select>
                     <div id="feeEstimate" style="margin-top: 8px; font-size: 0.875rem; color: #6b7280;">
-                        <span id="feeAmount">Estimating...</span>
+                        <span id="feeAmount" data-i18n="estimating">Estimating...</span>
                     </div>
                 </div>
 
                 <div class="balance-info" id="balanceInfo" style="display: none;">
-                    <p>Available Balance: <span id="balance">0</span> <span id="balanceCurrency">SOL</span></p>
+                    <p><span data-i18n="availableBalance">Available Balance</span>: <span id="balance">0</span> <span id="balanceCurrency">SOL</span></p>
                 </div>
 
-                <button id="sendPayment" class="btn-send">Send Payment</button>
+                <button id="sendPayment" class="btn-send" data-i18n="sendPayment">Send Payment</button>
             </div>
 
             <div class="transaction-status" id="transactionStatus" style="display: none;">
                 <div class="status-message" id="statusMessage"></div>
                 <div class="transaction-hash" id="transactionHash" style="display: none;">
-                    <p>Transaction Hash:</p>
+                    <p data-i18n="transactionHash">Transaction Hash:</p>
                     <a id="txHashLink" href="#" target="_blank" rel="noopener noreferrer"></a>
                 </div>
             </div>
         </div>
 
         <div class="info-section">
-            <h3>Supported Currencies</h3>
+            <h3 data-i18n="supportedCurrencies">Supported Currencies</h3>
             <div class="currency-grid">
                 <div class="currency-item">
                     <div class="currency-icon">◎</div>
-                    <div class="currency-name">Solana</div>
+                    <div class="currency-name" data-i18n="solana">Solana</div>
                     <div class="currency-code">SOL</div>
                 </div>
                 <div class="currency-item">
                     <div class="currency-icon">Ξ</div>
-                    <div class="currency-name">Ethereum</div>
+                    <div class="currency-name" data-i18n="ethereum">Ethereum</div>
                     <div class="currency-code">ETH</div>
                 </div>
                 <div class="currency-item">
                     <div class="currency-icon">₿</div>
-                    <div class="currency-name">Bitcoin</div>
+                    <div class="currency-name" data-i18n="bitcoin">Bitcoin</div>
                     <div class="currency-code">BTC</div>
                 </div>
                 <div class="currency-item">
                     <div class="currency-icon">$</div>
-                    <div class="currency-name">USD Coin</div>
+                    <div class="currency-name" data-i18n="usdCoin">USD Coin</div>
                     <div class="currency-code">USDC</div>
                 </div>
             </div>
         </div>
 
         <div class="transaction-history" id="transactionHistorySection" style="display: none;">
-            <h3>Transaction History</h3>
+            <h3 data-i18n="transactionHistory">Transaction History</h3>
 
             <div class="history-filters">
                 <select id="historyNetworkFilter" class="form-control">
-                    <option value="">All Networks</option>
-                    <option value="SOL">Solana</option>
-                    <option value="ETH">Ethereum</option>
-                    <option value="POLYGON">Polygon</option>
-                    <option value="BASE">Base</option>
-                    <option value="BTC">Bitcoin</option>
+                    <option value="" data-i18n="allNetworks">All Networks</option>
+                    <option value="SOL" data-i18n="solana">Solana</option>
+                    <option value="ETH" data-i18n="ethereum">Ethereum</option>
+                    <option value="POLYGON" data-i18n="polygon">Polygon</option>
+                    <option value="BASE" data-i18n="base">Base</option>
+                    <option value="BTC" data-i18n="bitcoin">Bitcoin</option>
                 </select>
 
                 <select id="historyStatusFilter" class="form-control">
-                    <option value="">All Status</option>
-                    <option value="confirmed">Confirmed</option>
-                    <option value="pending">Pending</option>
-                    <option value="failed">Failed</option>
+                    <option value="" data-i18n="allStatus">All Status</option>
+                    <option value="confirmed" data-i18n="confirmed">Confirmed</option>
+                    <option value="pending" data-i18n="pending">Pending</option>
+                    <option value="failed" data-i18n="failed">Failed</option>
                 </select>
 
-                <button id="clearHistory" class="btn-secondary">Clear History</button>
+                <button id="clearHistory" class="btn-secondary" data-i18n="clearHistory">Clear History</button>
             </div>
 
             <div id="transactionList" class="transaction-list">
-                <p class="no-transactions">No transactions yet</p>
+                <p class="no-transactions" data-i18n="noTransactions">No transactions yet</p>
             </div>
         </div>
 
         <footer>
-            <p>Powered by Phantom Wallet | Secure Crypto Payments</p>
+            <p data-i18n="footerText">Powered by Phantom Wallet | Secure Crypto Payments</p>
         </footer>
     </div>
 
