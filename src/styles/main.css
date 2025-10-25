@@ -403,6 +403,106 @@ footer {
   }
 }
 
+/* Receive / QR Code Section Styles */
+.receive-section {
+  background: white;
+  border-radius: 1rem;
+  padding: 1.5rem;
+  box-shadow: 0 0.25rem 1.5rem rgba(0, 0, 0, 0.1);
+  margin-top: 1.875rem;
+  animation: fadeIn 0.6s ease-out;
+}
+
+.receive-section h3 {
+  font-size: 1.5rem;
+  margin-bottom: 0.5rem;
+  color: #333;
+  font-weight: 600;
+}
+
+.receive-subtitle {
+  color: #6c757d;
+  font-size: 0.875rem;
+  margin-bottom: 1.5rem;
+}
+
+.receive-content {
+  display: flex;
+  gap: 2rem;
+  align-items: flex-start;
+  flex-wrap: wrap;
+}
+
+.qr-code-container {
+  flex: 0 0 auto;
+  background: white;
+  padding: 1rem;
+  border-radius: 0.5rem;
+  border: 2px solid #e9ecef;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.qr-code-container canvas {
+  display: block;
+  max-width: 200px;
+  height: auto;
+}
+
+.receive-details {
+  flex: 1;
+  min-width: 280px;
+}
+
+.receive-address-container {
+  margin-top: 1.25rem;
+}
+
+.receive-address-container label {
+  display: block;
+  margin-bottom: 0.5rem;
+  color: #495057;
+  font-weight: 500;
+  font-size: 0.875rem;
+}
+
+.address-display {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.address-display input {
+  flex: 1;
+  font-family: monospace;
+  font-size: 0.875rem;
+}
+
+.btn-copy {
+  padding: 0.625rem 1rem;
+  background: var(--color-primary);
+  color: white;
+  border: none;
+  border-radius: 0.5rem;
+  cursor: pointer;
+  font-weight: 500;
+  white-space: nowrap;
+  transition: background 0.3s ease, transform 0.1s ease;
+}
+
+.btn-copy:hover {
+  background: var(--color-primary-dark);
+  transform: translateY(-2px);
+}
+
+.btn-copy:active {
+  transform: translateY(0);
+}
+
+.btn-copy.copied {
+  background: var(--color-success);
+}
+
 /* Transaction History Styles */
 .transaction-history {
   background: white;
@@ -541,6 +641,23 @@ footer {
 }
 
 @media (max-width: 768px) {
+  .receive-content {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .receive-details {
+    width: 100%;
+  }
+
+  .address-display {
+    flex-direction: column;
+  }
+
+  .btn-copy {
+    width: 100%;
+  }
+
   .history-filters {
     flex-direction: column;
   }

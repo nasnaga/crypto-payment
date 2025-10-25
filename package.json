@@ -27,7 +27,8 @@
     "@solana/web3.js": "^1.87.0",
     "buffer": "^6.0.3",
     "ethers": "^6.15.0",
-    "idb": "^8.0.3"
+    "idb": "^8.0.3",
+    "qrcode": "^1.5.4"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4.1.16",

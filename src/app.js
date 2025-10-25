@@ -7,6 +7,7 @@ import { transactionHistoryService } from './services/transactionHistoryService.
 import { Connection, PublicKey, Transaction, SystemProgram, LAMPORTS_PER_SOL } from '@solana/web3.js';
 import { getAssociatedTokenAddress, createTransferInstruction } from '@solana/spl-token';
 import { NETWORK_CONFIG, ACTIVE_NETWORKS, TOKENS, SPL_TOKENS, ERC20_TOKENS, EXPLORERS } from './config.js';
+import QRCode from 'qrcode';
 
 class CryptoPaymentApp {
     constructor() {
@@ -44,6 +45,10 @@ class CryptoPaymentApp {
         document.getElementById('historyNetworkFilter').addEventListener('change', (e) => this.filterTransactions());
         document.getElementById('historyStatusFilter').addEventListener('change', (e) => this.filterTransactions());
         document.getElementById('clearHistory').addEventListener('click', () => this.clearTransactionHistory());
+
+        // QR Code / Receive section event listeners
+        document.getElementById('receiveNetwork').addEventListener('change', (e) => this.onReceiveNetworkChange(e));
+        document.getElementById('copyAddress').addEventListener('click', () => this.copyAddressToClipboard());
     }
 
     checkPhantomWallet() {
@@ -193,6 +198,7 @@ class CryptoPaymentApp {
 
         this.getBalance();
         this.loadTransactionHistory();
+        this.showReceiveSection();
     }
 
     handleWalletDisconnected() {
@@ -895,6 +901,79 @@ class CryptoPaymentApp {
                 console.error('Error clearing transaction history:', error);
                 alert('Failed to clear transaction history');
             }
+        }
+    }
+
+    // QR Code / Receive Methods
+    showReceiveSection() {
+        const receiveSection = document.getElementById('receiveSection');
+        receiveSection.style.display = 'block';
+
+        // Set initial network to current network
+        document.getElementById('receiveNetwork').value = this.currentNetwork;
+
+        // Generate QR code for current address
+        this.generateQRCode();
+    }
+
+    async generateQRCode() {
+        try {
+            const network = document.getElementById('receiveNetwork').value;
+            const address = this.walletAddresses[network];
+
+            if (!address) {
+                console.warn('No address for network:', network);
+                return;
+            }
+
+            // Update address display
+            document.getElementById('receiveAddress').value = address;
+
+            // Generate QR code on canvas
+            const canvas = document.getElementById('qrCodeCanvas');
+            await QRCode.toCanvas(canvas, address, {
+                width: 200,
+                margin: 2,
+                color: {
+                    dark: '#000000',
+                    light: '#FFFFFF',
+                },
+            });
+        } catch (error) {
+            console.error('Error generating QR code:', error);
+        }
+    }
+
+    onReceiveNetworkChange(event) {
+        this.generateQRCode();
+    }
+
+    async copyAddressToClipboard() {
+        try {
+            const addressInput = document.getElementById('receiveAddress');
+            const address = addressInput.value;
+
+            if (!address) {
+                return;
+            }
+
+            // Copy to clipboard
+            await navigator.clipboard.writeText(address);
+
+            // Show feedback
+            const copyBtn = document.getElementById('copyAddress');
+            const originalText = copyBtn.textContent;
+            copyBtn.textContent = '✓ Copied!';
+            copyBtn.classList.add('copied');
+
+            // Reset button after 2 seconds
+            setTimeout(() => {
+                copyBtn.textContent = originalText;
+                copyBtn.classList.remove('copied');
+            }, 2000);
+        } catch (error) {
+            console.error('Error copying to clipboard:', error);
+            alert('Failed to copy address');
         }
     }
 }
