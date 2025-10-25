@@ -4,6 +4,7 @@ import { splTokenService } from './services/splTokenService.js';
 import { erc20TokenService } from './services/erc20TokenService.js';
 import { feeService } from './services/feeService.js';
 import { transactionHistoryService } from './services/transactionHistoryService.js';
+import { addressBookService } from './services/addressBookService.js';
 import { Connection, PublicKey, Transaction, SystemProgram, LAMPORTS_PER_SOL } from '@solana/web3.js';
 import { getAssociatedTokenAddress, createTransferInstruction } from '@solana/spl-token';
 import { NETWORK_CONFIG, ACTIVE_NETWORKS, TOKENS, SPL_TOKENS, ERC20_TOKENS, EXPLORERS } from './config.js';
@@ -25,6 +26,7 @@ class CryptoPaymentApp {
         this.selectedSPLToken = null;
         this.selectedERC20Token = null;
         this.selectedFeeSpeed = 'medium';
+        this.editingContactId = null;
         this.init();
     }
 
@@ -49,6 +51,23 @@ class CryptoPaymentApp {
         // QR Code / Receive section event listeners
         document.getElementById('receiveNetwork').addEventListener('change', (e) => this.onReceiveNetworkChange(e));
         document.getElementById('copyAddress').addEventListener('click', () => this.copyAddressToClipboard());
+
+        // Address Book event listeners
+        document.getElementById('openAddressBook').addEventListener('click', () => this.openAddressBook());
+        document.getElementById('closeAddressBook').addEventListener('click', () => this.closeAddressBook());
+        document.getElementById('addNewContact').addEventListener('click', () => this.openContactModal());
+        document.getElementById('searchContacts').addEventListener('input', (e) => this.searchContacts(e));
+        document.getElementById('closeContactModal').addEventListener('click', () => this.closeContactModal());
+        document.getElementById('cancelContact').addEventListener('click', () => this.closeContactModal());
+        document.getElementById('contactForm').addEventListener('submit', (e) => this.saveContactHandler(e));
+
+        // Close modals when clicking outside
+        document.getElementById('addressBookModal').addEventListener('click', (e) => {
+            if (e.target.id === 'addressBookModal') this.closeAddressBook();
+        });
+        document.getElementById('contactModal').addEventListener('click', (e) => {
+            if (e.target.id === 'contactModal') this.closeContactModal();
+        });
     }
 
     checkPhantomWallet() {
@@ -904,6 +923,182 @@ class CryptoPaymentApp {
         }
     }
 
+    // Address Book Methods
+    async openAddressBook() {
+        document.getElementById('addressBookModal').style.display = 'flex';
+        await this.loadContacts();
+    }
+
+    closeAddressBook() {
+        document.getElementById('addressBookModal').style.display = 'none';
+        document.getElementById('searchContacts').value = '';
+    }
+
+    openContactModal(contact = null) {
+        const modal = document.getElementById('contactModal');
+        const title = document.getElementById('contactModalTitle');
+        const form = document.getElementById('contactForm');
+
+        if (contact) {
+            // Edit mode
+            this.editingContactId = contact.id;
+            title.textContent = 'Edit Contact';
+            document.getElementById('contactName').value = contact.name;
+            document.getElementById('contactNetwork').value = contact.network;
+            document.getElementById('contactAddress').value = contact.address;
+            document.getElementById('contactNotes').value = contact.notes || '';
+        } else {
+            // Add mode
+            this.editingContactId = null;
+            title.textContent = 'Add Contact';
+            form.reset();
+            // Set default network to current
+            document.getElementById('contactNetwork').value = this.currentNetwork;
+        }
+
+        modal.style.display = 'flex';
+    }
+
+    closeContactModal() {
+        document.getElementById('contactModal').style.display = 'none';
+        document.getElementById('contactForm').reset();
+        this.editingContactId = null;
+    }
+
+    async saveContactHandler(event) {
+        event.preventDefault();
+
+        const name = document.getElementById('contactName').value.trim();
+        const network = document.getElementById('contactNetwork').value;
+        const address = document.getElementById('contactAddress').value.trim();
+        const notes = document.getElementById('contactNotes').value.trim();
+
+        if (!name || !address) {
+            alert('Please fill in all required fields');
+            return;
+        }
+
+        try {
+            if (this.editingContactId) {
+                // Update existing contact
+                await addressBookService.updateContact(this.editingContactId, {
+                    name,
+                    network,
+                    address,
+                    notes,
+                });
+            } else {
+                // Add new contact
+                await addressBookService.addContact({
+                    name,
+                    network,
+                    address,
+                    notes,
+                });
+            }
+
+            this.closeContactModal();
+            await this.loadContacts();
+        } catch (error) {
+            console.error('Error saving contact:', error);
+            alert('Failed to save contact');
+        }
+    }
+
+    async loadContacts(searchTerm = '') {
+        try {
+            let contacts;
+
+            if (searchTerm) {
+                contacts = await addressBookService.searchContacts(searchTerm);
+            } else {
+                contacts = await addressBookService.getAllContacts();
+            }
+
+            this.displayContacts(contacts);
+        } catch (error) {
+            console.error('Error loading contacts:', error);
+        }
+    }
+
+    displayContacts(contacts) {
+        const contactsList = document.getElementById('contactsList');
+
+        if (contacts.length === 0) {
+            contactsList.innerHTML = '<p class="no-contacts">No contacts found</p>';
+            return;
+        }
+
+        const contactsHTML = contacts.map(contact => `
+            <div class="contact-item" data-id="${contact.id}">
+                <div class="contact-info">
+                    <div class="contact-name">${this.escapeHtml(contact.name)}</div>
+                    <div class="contact-network">${contact.network}</div>
+                    <div class="contact-address">${this.formatAddress(contact.address)}</div>
+                    ${contact.notes ? `<div class="contact-notes">${this.escapeHtml(contact.notes)}</div>` : ''}
+                </div>
+                <div class="contact-actions">
+                    <button class="btn-use" onclick="app.useContact(${contact.id})">Use</button>
+                    <button class="btn-icon" onclick="app.editContact(${contact.id})" title="Edit">✏️</button>
+                    <button class="btn-icon" onclick="app.deleteContact(${contact.id})" title="Delete">🗑️</button>
+                </div>
+            </div>
+        `).join('');
+
+        contactsList.innerHTML = contactsHTML;
+    }
+
+    async useContact(id) {
+        try {
+            const contact = await addressBookService.getContact(id);
+
+            if (contact) {
+                // Set recipient address
+                document.getElementById('recipientAddress').value = contact.address;
+
+                // Set network if it matches current options
+                const currencySelect = document.getElementById('currency');
+                if (currencySelect.querySelector(`option[value="${contact.network}"]`)) {
+                    currencySelect.value = contact.network;
+                    // Trigger change event to update UI
+                    currencySelect.dispatchEvent(new Event('change'));
+                }
+
+                // Update last used
+                await addressBookService.updateLastUsed(id);
+
+                // Close address book
+                this.closeAddressBook();
+            }
+        } catch (error) {
+            console.error('Error using contact:', error);
+            alert('Failed to use contact');
+        }
+    }
+
+    async editContact(id) {
+        try {
+            const contact = await addressBookService.getContact(id);
+            if (contact) {
+                this.openContactModal(contact);
+            }
+        } catch (error) {
+            console.error('Error editing contact:', error);
+        }
+    }
+
+    async deleteContact(id) {
+        if (confirm('Are you sure you want to delete this contact?')) {
+            try {
+                await addressBookService.deleteContact(id);
+                await this.loadContacts();
+            } catch (error) {
+                console.error('Error deleting contact:', error);
+                alert('Failed to delete contact');
+            }
+        }
+    }
+
     // QR Code / Receive Methods
     showReceiveSection() {
         const receiveSection = document.getElementById('receiveSection');
@@ -975,6 +1170,17 @@ class CryptoPaymentApp {
             console.error('Error copying to clipboard:', error);
             alert('Failed to copy address');
         }
+    }
+
+    async searchContacts(event) {
+        const searchTerm = event.target.value.trim();
+        await this.loadContacts(searchTerm);
+    }
+
+    escapeHtml(text) {
+        const div = document.createElement('div');
+        div.textContent = text;
+        return div.innerHTML;
     }
 }
 
