@@ -276,10 +276,6 @@ class CryptoPaymentApp {
             const balanceElement = document.getElementById('balance');
             const balanceCurrency = document.getElementById('balanceCurrency');
 
-            balanceInfo.style.display = 'block';
-            balanceElement.textContent = 'Loading...';
-            balanceCurrency.textContent = currency;
-
             // Get the appropriate wallet address for the currency
             let address = null;
             let network = null;
@@ -289,6 +285,8 @@ class CryptoPaymentApp {
                     address = this.walletAddresses.SOL;
                     break;
                 case 'ETH':
+                case 'POLYGON':
+                case 'BASE':
                     address = this.walletAddresses.ETH;
                     break;
                 case 'BTC':
@@ -301,10 +299,16 @@ class CryptoPaymentApp {
                     break;
             }
 
+            // If no wallet connected for this currency, hide balance
             if (!address) {
-                balanceElement.textContent = '0.00';
+                balanceInfo.style.display = 'none';
                 return;
             }
+
+            // Show balance display and set loading state
+            balanceInfo.style.display = 'block';
+            balanceElement.textContent = 'Loading...';
+            balanceCurrency.textContent = currency;
 
             // Fetch balance using balanceService
             const balance = await balanceService.getBalance(address, currency, network);
@@ -313,13 +317,16 @@ class CryptoPaymentApp {
                 // Format balance to 6 decimal places
                 balanceElement.textContent = balance.toFixed(6);
             } else {
-                balanceElement.textContent = 'Error';
+                balanceElement.textContent = '0.00';
             }
 
         } catch (error) {
             console.error('Error fetching balance:', error);
             const balanceElement = document.getElementById('balance');
-            balanceElement.textContent = 'Error';
+            const balanceInfo = document.getElementById('balanceInfo');
+
+            // Hide balance on error instead of showing "Error"
+            balanceInfo.style.display = 'none';
         }
     }
 
