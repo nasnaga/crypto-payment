@@ -14,15 +14,20 @@
 <body>
     <div class="container">
         <header>
-            <div class="header-content">
-                <div>
-                    <h1>Crypto Payment Gateway</h1>
-                    <p class="subtitle">Pay with Phantom Wallet</p>
-                </div>
+            <div class="header-top">
+                <select id="languageSelector" class="language-selector">
+                    <option value="en">English</option>
+                    <option value="es">Español</option>
+                    <option value="fr">Français</option>
+                    <option value="ja">日本語</option>
+                    <option value="zh">中文</option>
+                </select>
                 <button id="darkModeToggle" class="dark-mode-toggle" aria-label="Toggle dark mode">
                     <span class="theme-icon">🌙</span>
                 </button>
             </div>
+            <h1 data-i18n="appTitle">Crypto Payment Gateway</h1>
+            <p class="subtitle" data-i18n="appSubtitle">Pay with Phantom Wallet</p>
         </header>
 
         <div class="payment-card">

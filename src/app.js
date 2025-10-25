@@ -5,6 +5,7 @@ import { erc20TokenService } from './services/erc20TokenService.js';
 import { feeService } from './services/feeService.js';
 import { transactionHistoryService } from './services/transactionHistoryService.js';
 import { addressBookService } from './services/addressBookService.js';
+import { i18nService } from './i18n/i18nService.js';
 import { Connection, PublicKey, Transaction, SystemProgram, LAMPORTS_PER_SOL } from '@solana/web3.js';
 import { getAssociatedTokenAddress, createTransferInstruction } from '@solana/spl-token';
 import { NETWORK_CONFIG, ACTIVE_NETWORKS, TOKENS, SPL_TOKENS, ERC20_TOKENS, EXPLORERS } from './config.js';
@@ -31,6 +32,7 @@ class CryptoPaymentApp {
     }
 
     init() {
+        i18nService.init();
         this.setupEventListeners();
         this.checkPhantomWallet();
         this.parsePaymentLinkParams();
@@ -76,6 +78,11 @@ class CryptoPaymentApp {
 
         // Dark mode toggle
         document.getElementById('darkModeToggle').addEventListener('click', () => this.toggleDarkMode());
+
+        // Language selector
+        const languageSelector = document.getElementById('languageSelector');
+        languageSelector.value = i18nService.getCurrentLanguage();
+        languageSelector.addEventListener('change', (e) => this.changeLanguage(e.target.value));
     }
 
     checkPhantomWallet() {
@@ -1364,6 +1371,38 @@ class CryptoPaymentApp {
     updateDarkModeIcon(isDark) {
         const themeIcon = document.querySelector('.theme-icon');
         themeIcon.textContent = isDark ? '☀️' : '🌙';
+    }
+
+    changeLanguage(lang) {
+        i18nService.setLanguage(lang);
+
+        // Update button texts that might have been changed dynamically
+        const connectBtn = document.getElementById('connectWallet');
+        const sendBtn = document.getElementById('sendPayment');
+        const walletAddress = document.getElementById('walletAddress');
+
+        // Update wallet button based on connection status
+        if (this.walletAddresses[this.currentNetwork]) {
+            connectBtn.textContent = i18nService.translate('connected');
+            walletAddress.textContent = this.formatAddress(this.walletAddresses[this.currentNetwork]);
+        } else {
+            connectBtn.textContent = i18nService.translate('connectWallet');
+            walletAddress.textContent = i18nService.translate('notConnected');
+        }
+
+        // Update send button
+        sendBtn.textContent = i18nService.translate('sendPayment');
+
+        // Update fee estimate text if visible
+        const feeAmount = document.getElementById('feeAmount');
+        if (feeAmount && feeAmount.textContent.includes('Estimating')) {
+            feeAmount.textContent = i18nService.translate('estimating');
+        }
+
+        // Reload transaction history with translated text
+        if (document.getElementById('transactionHistorySection').style.display !== 'none') {
+            this.loadTransactionHistory();
+        }
     }
 }
 
