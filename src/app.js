@@ -34,6 +34,7 @@ class CryptoPaymentApp {
         this.setupEventListeners();
         this.checkPhantomWallet();
         this.parsePaymentLinkParams();
+        this.initDarkMode();
     }
 
     setupEventListeners() {
@@ -72,6 +73,9 @@ class CryptoPaymentApp {
 
         // Payment link event listener
         document.getElementById('createPaymentLink').addEventListener('click', () => this.createPaymentLink());
+
+        // Dark mode toggle
+        document.getElementById('darkModeToggle').addEventListener('click', () => this.toggleDarkMode());
     }
 
     checkPhantomWallet() {
@@ -1071,6 +1075,7 @@ class CryptoPaymentApp {
         }
     }
 
+<<<<<<< HEAD
     // Address Book Methods
     async openAddressBook() {
         document.getElementById('addressBookModal').style.display = 'flex';
@@ -1329,6 +1334,36 @@ class CryptoPaymentApp {
         const div = document.createElement('div');
         div.textContent = text;
         return div.innerHTML;
+    }
+
+    // Dark Mode Methods
+    initDarkMode() {
+        // Check for saved dark mode preference
+        const savedTheme = localStorage.getItem('theme');
+        const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+
+        // Apply dark mode if saved or if user prefers dark mode
+        if (savedTheme === 'dark' || (!savedTheme && prefersDark)) {
+            document.body.classList.add('dark-mode');
+            this.updateDarkModeIcon(true);
+        } else {
+            this.updateDarkModeIcon(false);
+        }
+    }
+
+    toggleDarkMode() {
+        const isDark = document.body.classList.toggle('dark-mode');
+
+        // Save preference
+        localStorage.setItem('theme', isDark ? 'dark' : 'light');
+
+        // Update icon
+        this.updateDarkModeIcon(isDark);
+    }
+
+    updateDarkModeIcon(isDark) {
+        const themeIcon = document.querySelector('.theme-icon');
+        themeIcon.textContent = isDark ? '☀️' : '🌙';
     }
 }
 
