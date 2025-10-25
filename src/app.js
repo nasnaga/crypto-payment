@@ -1082,7 +1082,6 @@ class CryptoPaymentApp {
         }
     }
 
-<<<<<<< HEAD
     // Address Book Methods
     async openAddressBook() {
         document.getElementById('addressBookModal').style.display = 'flex';
