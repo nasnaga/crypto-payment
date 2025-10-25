@@ -163,6 +163,34 @@
             </div>
         </div>
 
+        <div class="transaction-history" id="transactionHistorySection" style="display: none;">
+            <h3>Transaction History</h3>
+
+            <div class="history-filters">
+                <select id="historyNetworkFilter" class="form-control">
+                    <option value="">All Networks</option>
+                    <option value="SOL">Solana</option>
+                    <option value="ETH">Ethereum</option>
+                    <option value="POLYGON">Polygon</option>
+                    <option value="BASE">Base</option>
+                    <option value="BTC">Bitcoin</option>
+                </select>
+
+                <select id="historyStatusFilter" class="form-control">
+                    <option value="">All Status</option>
+                    <option value="confirmed">Confirmed</option>
+                    <option value="pending">Pending</option>
+                    <option value="failed">Failed</option>
+                </select>
+
+                <button id="clearHistory" class="btn-secondary">Clear History</button>
+            </div>
+
+            <div id="transactionList" class="transaction-list">
+                <p class="no-transactions">No transactions yet</p>
+            </div>
+        </div>
+
         <footer>
             <p>Powered by Phantom Wallet | Secure Crypto Payments</p>
         </footer>

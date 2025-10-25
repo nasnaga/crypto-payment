@@ -3,9 +3,10 @@ import { balanceService } from './services/balanceService.js';
 import { splTokenService } from './services/splTokenService.js';
 import { erc20TokenService } from './services/erc20TokenService.js';
 import { feeService } from './services/feeService.js';
+import { transactionHistoryService } from './services/transactionHistoryService.js';
 import { Connection, PublicKey, Transaction, SystemProgram, LAMPORTS_PER_SOL } from '@solana/web3.js';
 import { getAssociatedTokenAddress, createTransferInstruction } from '@solana/spl-token';
-import { NETWORK_CONFIG, ACTIVE_NETWORKS, TOKENS, SPL_TOKENS, ERC20_TOKENS } from './config.js';
+import { NETWORK_CONFIG, ACTIVE_NETWORKS, TOKENS, SPL_TOKENS, ERC20_TOKENS, EXPLORERS } from './config.js';
 import QRCode from 'qrcode';
 
 class CryptoPaymentApp {
@@ -39,6 +40,11 @@ class CryptoPaymentApp {
         document.getElementById('splToken').addEventListener('change', (e) => this.onSPLTokenChange(e));
         document.getElementById('erc20Token').addEventListener('change', (e) => this.onERC20TokenChange(e));
         document.getElementById('feeSpeed').addEventListener('change', (e) => this.onFeeSpeedChange(e));
+
+        // Transaction history event listeners
+        document.getElementById('historyNetworkFilter').addEventListener('change', (e) => this.filterTransactions());
+        document.getElementById('historyStatusFilter').addEventListener('change', (e) => this.filterTransactions());
+        document.getElementById('clearHistory').addEventListener('click', () => this.clearTransactionHistory());
 
         // QR Code / Receive section event listeners
         document.getElementById('receiveNetwork').addEventListener('change', (e) => this.onReceiveNetworkChange(e));
@@ -191,6 +197,7 @@ class CryptoPaymentApp {
         paymentForm.style.display = 'block';
 
         this.getBalance();
+        this.loadTransactionHistory();
         this.showReceiveSection();
     }
 
@@ -505,6 +512,17 @@ class CryptoPaymentApp {
 
             this.showStatus('success', 'Payment sent successfully!', txHash);
 
+            // Save transaction to history
+            await this.saveTransactionToHistory({
+                txHash,
+                amount,
+                currency: this.selectedSPLToken?.symbol || this.selectedERC20Token || currency,
+                recipient,
+                sender: this.walletAddresses[this.currentNetwork],
+                network: this.currentNetwork,
+                status: 'confirmed',
+            });
+
             // Clear form
             document.getElementById('amount').value = '';
             document.getElementById('recipientAddress').value = '';
@@ -517,6 +535,9 @@ class CryptoPaymentApp {
             } else {
                 this.getBalance();
             }
+
+            // Reload transaction history
+            this.loadTransactionHistory();
 
             sendBtn.disabled = false;
             sendBtn.textContent = 'Send Payment';
@@ -763,6 +784,123 @@ class CryptoPaymentApp {
             setTimeout(() => {
                 statusDiv.style.display = 'none';
             }, 10000);
+        }
+    }
+
+    // Transaction History Methods
+    async saveTransactionToHistory(transaction) {
+        try {
+            // Get explorer URL
+            let explorerUrl = '';
+            const network = transaction.network.toLowerCase();
+            const activeNetwork = ACTIVE_NETWORKS[network] || 'mainnet';
+
+            if (EXPLORERS[network]) {
+                const explorerBase = EXPLORERS[network][activeNetwork];
+                explorerUrl = `${explorerBase}/tx/${transaction.txHash}`;
+            }
+
+            await transactionHistoryService.addTransaction({
+                ...transaction,
+                explorerUrl,
+                timestamp: Date.now(),
+            });
+        } catch (error) {
+            console.error('Error saving transaction:', error);
+        }
+    }
+
+    async loadTransactionHistory() {
+        try {
+            const transactions = await transactionHistoryService.getAllTransactions();
+            this.displayTransactions(transactions);
+
+            // Show history section if we have transactions
+            const historySection = document.getElementById('transactionHistorySection');
+            if (transactions.length > 0) {
+                historySection.style.display = 'block';
+            }
+        } catch (error) {
+            console.error('Error loading transaction history:', error);
+        }
+    }
+
+    displayTransactions(transactions) {
+        const transactionList = document.getElementById('transactionList');
+
+        if (transactions.length === 0) {
+            transactionList.innerHTML = '<p class="no-transactions">No transactions yet</p>';
+            return;
+        }
+
+        const transactionsHTML = transactions.map(tx => {
+            const date = new Date(tx.timestamp);
+            const statusClass = `badge-${tx.status}`;
+
+            return `
+                <div class="transaction-item">
+                    <div class="transaction-header">
+                        <div class="transaction-amount">
+                            ${parseFloat(tx.amount).toFixed(6)} ${tx.currency}
+                        </div>
+                        <div class="transaction-badge ${statusClass}">
+                            ${tx.status}
+                        </div>
+                    </div>
+                    <div class="transaction-details">
+                        <strong>Network:</strong> ${tx.network}
+                    </div>
+                    <div class="transaction-details">
+                        <strong>To:</strong> ${this.formatAddress(tx.recipient)}
+                    </div>
+                    ${tx.explorerUrl ? `
+                        <a href="${tx.explorerUrl}" target="_blank" rel="noopener noreferrer" class="transaction-hash">
+                            View on Explorer: ${tx.txHash.substring(0, 8)}...${tx.txHash.substring(tx.txHash.length - 8)}
+                        </a>
+                    ` : ''}
+                    <div class="transaction-timestamp">
+                        ${date.toLocaleString()}
+                    </div>
+                </div>
+            `;
+        }).join('');
+
+        transactionList.innerHTML = transactionsHTML;
+    }
+
+    async filterTransactions() {
+        try {
+            const networkFilter = document.getElementById('historyNetworkFilter').value;
+            const statusFilter = document.getElementById('historyStatusFilter').value;
+
+            let transactions = await transactionHistoryService.getAllTransactions();
+
+            // Apply network filter
+            if (networkFilter) {
+                transactions = transactions.filter(tx => tx.network === networkFilter);
+            }
+
+            // Apply status filter
+            if (statusFilter) {
+                transactions = transactions.filter(tx => tx.status === statusFilter);
+            }
+
+            this.displayTransactions(transactions);
+        } catch (error) {
+            console.error('Error filtering transactions:', error);
+        }
+    }
+
+    async clearTransactionHistory() {
+        if (confirm('Are you sure you want to clear all transaction history?')) {
+            try {
+                await transactionHistoryService.clearAllTransactions();
+                this.loadTransactionHistory();
+                document.getElementById('transactionHistorySection').style.display = 'none';
+            } catch (error) {
+                console.error('Error clearing transaction history:', error);
+                alert('Failed to clear transaction history');
+            }
         }
     }
 
