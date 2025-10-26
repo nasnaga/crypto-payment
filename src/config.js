@@ -1,24 +1,55 @@
-// Network and RPC Configuration
+// Network and RPC Configuration with Fallback Endpoints
 export const NETWORK_CONFIG = {
   solana: {
-    mainnet: 'https://api.mainnet-beta.solana.com',
-    devnet: 'https://api.devnet.solana.com',
-    testnet: 'https://api.testnet.solana.com',
+    mainnet: [
+      'https://api.mainnet-beta.solana.com',
+      'https://solana-api.projectserum.com',
+      'https://rpc.ankr.com/solana',
+    ],
+    devnet: [
+      'https://api.devnet.solana.com',
+      'https://devnet.genesysgo.net',
+    ],
+    testnet: ['https://api.testnet.solana.com'],
   },
   ethereum: {
-    mainnet: 'https://eth.llamarpc.com',
-    goerli: 'https://goerli.infura.io/v3',
+    mainnet: [
+      'https://eth.llamarpc.com',
+      'https://eth-mainnet.public.blastapi.io',
+      'https://rpc.ankr.com/eth',
+      'https://eth-rpc.gateway.pokt.network',
+    ],
+    goerli: [
+      'https://goerli.infura.io/v3',
+      'https://eth-goerli.public.blastapi.io',
+    ],
   },
   polygon: {
-    mainnet: 'https://polygon-rpc.com',
-    mumbai: 'https://rpc-mumbai.maticvigil.com',
+    mainnet: [
+      'https://polygon-rpc.com',
+      'https://poly-rpc.gateway.pokt.network',
+      'https://rpc.ankr.com/polygon',
+    ],
+    mumbai: [
+      'https://rpc-mumbai.maticvigil.com',
+      'https://mumbai.gateway.tenderly.co',
+    ],
   },
   base: {
-    mainnet: 'https://mainnet.base.org',
-    goerli: 'https://goerli.base.org',
+    mainnet: [
+      'https://mainnet.base.org',
+      'https://base.publicnode.com',
+    ],
+    goerli: [
+      'https://goerli.base.org',
+      'https://base-goerli.publicnode.com',
+    ],
   },
   bitcoin: {
-    mainnet: 'https://blockstream.info/api',
+    mainnet: [
+      'https://blockstream.info/api',
+      'https://btc.getblock.io/mainnet',
+    ],
   },
 };
 
