@@ -315,7 +315,9 @@ class CryptoPaymentApp {
 
         walletAddress.textContent = 'Not Connected';
 
-        // Show connect button, hide disconnect button
+        // Show connect button, hide disconnect button and reset connect button state
+        connectBtn.textContent = 'Connect Phantom Wallet';
+        connectBtn.disabled = false;
         connectBtn.style.display = 'block';
         disconnectBtn.style.display = 'none';
 
