@@ -209,8 +209,15 @@ class CryptoPaymentApp {
             this.showStatus('error', 'Failed to connect wallet: ' + error.message);
 
             const connectBtn = document.getElementById('connectWallet');
+            const disconnectBtn = document.getElementById('disconnectWallet');
+
+            // Restore connect button to initial state
             connectBtn.disabled = false;
             connectBtn.textContent = 'Connect Phantom Wallet';
+            connectBtn.style.display = 'block';
+
+            // Hide disconnect button
+            disconnectBtn.style.display = 'none';
         }
     }
 
@@ -260,8 +267,15 @@ class CryptoPaymentApp {
             this.showStatus('error', 'Failed to disconnect wallet: ' + error.message);
 
             const disconnectBtn = document.getElementById('disconnectWallet');
+            const connectBtn = document.getElementById('connectWallet');
+
+            // Restore disconnect button to clickable state
             disconnectBtn.disabled = false;
             disconnectBtn.textContent = 'Disconnect';
+            disconnectBtn.style.display = 'block';
+
+            // Keep connect button hidden
+            connectBtn.style.display = 'none';
         }
     }
 
