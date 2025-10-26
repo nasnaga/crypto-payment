@@ -261,6 +261,38 @@ body.dark-mode .theme-icon {
   transform: none;
 }
 
+.btn-disconnect {
+  background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
+  color: white;
+  border: none;
+  padding: 0.75rem 1.5rem;
+  border-radius: 0.625rem;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.btn-disconnect:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 5px 15px rgba(220, 53, 69, 0.4);
+}
+
+.btn-disconnect:active {
+  transform: translateY(0);
+}
+
+.btn-disconnect:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.wallet-buttons {
+  display: flex;
+  gap: 0.625rem;
+}
+
 .payment-form {
   animation: fadeIn 0.5s ease-in;
 }

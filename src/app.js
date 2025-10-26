@@ -41,6 +41,7 @@ class CryptoPaymentApp {
 
     setupEventListeners() {
         document.getElementById('connectWallet').addEventListener('click', () => this.connectWallet());
+        document.getElementById('disconnectWallet').addEventListener('click', () => this.disconnectWallet());
         document.getElementById('sendPayment').addEventListener('click', () => this.sendPayment());
         document.getElementById('currency').addEventListener('change', (e) => this.onCurrencyChange(e));
         document.getElementById('splToken').addEventListener('change', (e) => this.onSPLTokenChange(e));
@@ -213,11 +214,63 @@ class CryptoPaymentApp {
         }
     }
 
+    async disconnectWallet() {
+        try {
+            const disconnectBtn = document.getElementById('disconnectWallet');
+            disconnectBtn.disabled = true;
+            disconnectBtn.textContent = 'Disconnecting...';
+
+            // Disconnect from all providers
+            if (this.solanaProvider && this.solanaProvider.disconnect) {
+                try {
+                    await this.solanaProvider.disconnect();
+                } catch (error) {
+                    console.error('Error disconnecting from Solana:', error);
+                }
+            }
+
+            if (this.ethereumProvider && typeof this.ethereumProvider.request === 'function') {
+                try {
+                    // Some wallets support wallet_revokePermissions
+                    await this.ethereumProvider.request({
+                        method: 'wallet_revokePermissions',
+                        params: [{ eth_accounts: {} }],
+                    }).catch(() => {
+                        // Not all providers support this, so silently continue
+                    });
+                } catch (error) {
+                    console.error('Error disconnecting from Ethereum:', error);
+                }
+            }
+
+            if (this.bitcoinProvider && this.bitcoinProvider.disconnect) {
+                try {
+                    await this.bitcoinProvider.disconnect();
+                } catch (error) {
+                    console.error('Error disconnecting from Bitcoin:', error);
+                }
+            }
+
+            // Reset UI state
+            this.handleWalletDisconnected();
+            this.showStatus('success', 'Wallet disconnected successfully');
+
+        } catch (error) {
+            console.error('Disconnect error:', error);
+            this.showStatus('error', 'Failed to disconnect wallet: ' + error.message);
+
+            const disconnectBtn = document.getElementById('disconnectWallet');
+            disconnectBtn.disabled = false;
+            disconnectBtn.textContent = 'Disconnect';
+        }
+    }
+
     handleWalletConnected(network) {
         // Update UI
         const walletStatus = document.getElementById('walletStatus');
         const walletAddress = document.getElementById('walletAddress');
         const connectBtn = document.getElementById('connectWallet');
+        const disconnectBtn = document.getElementById('disconnectWallet');
         const paymentForm = document.getElementById('paymentForm');
 
         walletStatus.classList.remove('status-disconnected');
@@ -225,8 +278,10 @@ class CryptoPaymentApp {
 
         const currentAddress = this.walletAddresses[this.currentNetwork];
         walletAddress.textContent = this.formatAddress(currentAddress);
-        connectBtn.textContent = 'Connected';
-        connectBtn.disabled = true;
+
+        // Show disconnect button, hide connect button
+        connectBtn.style.display = 'none';
+        disconnectBtn.style.display = 'block';
 
         paymentForm.style.display = 'block';
 
@@ -252,14 +307,17 @@ class CryptoPaymentApp {
         const walletStatus = document.getElementById('walletStatus');
         const walletAddress = document.getElementById('walletAddress');
         const connectBtn = document.getElementById('connectWallet');
+        const disconnectBtn = document.getElementById('disconnectWallet');
         const paymentForm = document.getElementById('paymentForm');
 
         walletStatus.classList.remove('status-connected');
         walletStatus.classList.add('status-disconnected');
 
         walletAddress.textContent = 'Not Connected';
-        connectBtn.textContent = 'Connect Phantom Wallet';
-        connectBtn.disabled = false;
+
+        // Show connect button, hide disconnect button
+        connectBtn.style.display = 'block';
+        disconnectBtn.style.display = 'none';
 
         paymentForm.style.display = 'none';
     }
