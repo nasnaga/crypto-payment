@@ -151,20 +151,43 @@ class PhantomService {
 
   // Disconnect (if supported)
   async disconnect() {
-    if (this.solanaProvider && this.solanaProvider.disconnect) {
-      try {
-        await this.solanaProvider.disconnect();
-      } catch (error) {
-        console.error('Error disconnecting Solana:', error);
+    try {
+      // Disconnect from all providers
+      if (this.solanaProvider && this.solanaProvider.disconnect) {
+        try {
+          await this.solanaProvider.disconnect();
+        } catch (error) {
+          console.error('Error disconnecting Solana:', error);
+        }
       }
-    }
 
-    this.walletAddresses = {
-      solana: null,
-      ethereum: null,
-      bitcoin: null,
-    };
-    this.connected = false;
+      if (this.ethereumProvider && typeof this.ethereumProvider.request === 'function') {
+        try {
+          // Some wallets support wallet_revokePermissions
+          await this.ethereumProvider.request({
+            method: 'wallet_revokePermissions',
+            params: [{ eth_accounts: {} }],
+          }).catch(() => {
+            // Not all providers support this, so silently continue
+          });
+        } catch (error) {
+          console.error('Error disconnecting Ethereum:', error);
+        }
+      }
+
+      // Reset state for all networks
+      this.walletAddresses = {
+        solana: null,
+        ethereum: null,
+        bitcoin: null,
+      };
+      this.connected = false;
+
+      return true;
+    } catch (error) {
+      console.error('Error during disconnect:', error);
+      throw error;
+    }
   }
 
   // Setup event listeners
