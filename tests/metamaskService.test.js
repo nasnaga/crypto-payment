@@ -170,6 +170,78 @@ describe('MetaMaskService API', () => {
     });
   });
 
+  describe('Disconnect Functionality', () => {
+    it('should disconnect and reset account state', async () => {
+      const { metamaskService } = await import('../src/services/metamaskService.js');
+
+      // Set up connected state
+      metamaskService.currentAccount = '0x742d35Cc6634C0532925a3b844Bc9e7595f0bEb';
+      metamaskService.accounts = ['0x742d35Cc6634C0532925a3b844Bc9e7595f0bEb'];
+      metamaskService.isConnected = true;
+      metamaskService.currentChainId = 1;
+
+      // Disconnect
+      const result = await metamaskService.disconnect();
+
+      expect(result).toBe(true);
+      expect(metamaskService.currentAccount).toBeNull();
+      expect(metamaskService.accounts).toEqual([]);
+      expect(metamaskService.isConnected).toBe(false);
+      expect(metamaskService.currentChainId).toBeNull();
+    });
+
+    it('should clear providers on disconnect', async () => {
+      const { metamaskService } = await import('../src/services/metamaskService.js');
+
+      metamaskService.provider = { getBalance: vi.fn() };
+      metamaskService.signer = { sendTransaction: vi.fn() };
+
+      await metamaskService.disconnect();
+
+      expect(metamaskService.provider).toBeNull();
+      expect(metamaskService.signer).toBeNull();
+    });
+
+    it('should remove event listeners on disconnect', async () => {
+      const { metamaskService } = await import('../src/services/metamaskService.js');
+
+      await metamaskService.disconnect();
+
+      expect(global.window.ethereum.removeAllListeners).toHaveBeenCalled();
+    });
+
+    it('should handle disconnect when already disconnected', async () => {
+      const { metamaskService } = await import('../src/services/metamaskService.js');
+
+      metamaskService.isConnected = false;
+      metamaskService.currentAccount = null;
+
+      const result = await metamaskService.disconnect();
+
+      expect(result).toBe(true);
+      expect(metamaskService.isConnected).toBe(false);
+      expect(metamaskService.currentAccount).toBeNull();
+    });
+
+    it('should allow reconnection after disconnect', async () => {
+      const { metamaskService } = await import('../src/services/metamaskService.js');
+
+      // First connection
+      metamaskService.currentAccount = '0x742d35Cc6634C0532925a3b844Bc9e7595f0bEb';
+      metamaskService.isConnected = true;
+
+      // Disconnect
+      await metamaskService.disconnect();
+      expect(metamaskService.isConnected).toBe(false);
+
+      // Verify can set new connected state
+      metamaskService.currentAccount = '0xNewAddress123';
+      metamaskService.isConnected = true;
+      expect(metamaskService.isConnected).toBe(true);
+      expect(metamaskService.currentAccount).toBe('0xNewAddress123');
+    });
+  });
+
   describe('Error Handling', () => {
     it('should handle missing MetaMask gracefully', async () => {
       global.window.ethereum = undefined;

@@ -88,11 +88,17 @@ class MetaMaskService {
   // Disconnect MetaMask
   async disconnect() {
     try {
+      // Clean up event listeners first
+      this.removeEventListeners();
+
+      // Reset all state
       this.isConnected = false;
       this.currentAccount = null;
       this.accounts = [];
+      this.currentChainId = null;
       this.signer = null;
       this.provider = null;
+
       return true;
     } catch (error) {
       console.error('Error disconnecting MetaMask:', error);
