@@ -206,14 +206,13 @@ describe('BalanceService', () => {
       expect(global.fetch).toHaveBeenCalledTimes(1); // Only called once
     });
 
-    it('should throw error on Bitcoin API failure', async () => {
+    it('should return null on Bitcoin API failure', async () => {
       global.fetch.mockResolvedValueOnce({
         ok: false,
       });
 
-      await expect(
-        balanceService.getBitcoinBalance('invalid')
-      ).rejects.toThrow('Failed to fetch Bitcoin balance');
+      const result = await balanceService.getBitcoinBalance('invalid');
+      expect(result).toBeNull();
     });
   });
 

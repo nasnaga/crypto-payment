@@ -3,6 +3,7 @@ import { Connection, PublicKey } from '@solana/web3.js';
 import { ethers } from 'ethers';
 import { NETWORK_CONFIG, ACTIVE_NETWORKS, TOKENS, CACHE_TTL } from '../config.js';
 import { lamportsToSol, weiToEth, satoshisToBtc } from '../utils/formatters.js';
+import { rpcEndpointManager } from '../utils/rpcEndpointManager.js';
 
 class BalanceService {
   constructor() {
@@ -11,19 +12,23 @@ class BalanceService {
     this.ethereumProvider = null;
   }
 
-  // Initialize Solana connection
+  // Initialize Solana connection (deprecated - used for compatibility)
   initSolana() {
     if (!this.solanaConnection) {
-      const endpoint = NETWORK_CONFIG.solana[ACTIVE_NETWORKS.solana];
+      const endpoint = Array.isArray(NETWORK_CONFIG.solana[ACTIVE_NETWORKS.solana])
+        ? NETWORK_CONFIG.solana[ACTIVE_NETWORKS.solana][0]
+        : NETWORK_CONFIG.solana[ACTIVE_NETWORKS.solana];
       this.solanaConnection = new Connection(endpoint, 'confirmed');
     }
     return this.solanaConnection;
   }
 
-  // Initialize Ethereum provider
+  // Initialize Ethereum provider (deprecated - used for compatibility)
   initEthereum() {
     if (!this.ethereumProvider) {
-      const endpoint = NETWORK_CONFIG.ethereum[ACTIVE_NETWORKS.ethereum];
+      const endpoint = Array.isArray(NETWORK_CONFIG.ethereum[ACTIVE_NETWORKS.ethereum])
+        ? NETWORK_CONFIG.ethereum[ACTIVE_NETWORKS.ethereum][0]
+        : NETWORK_CONFIG.ethereum[ACTIVE_NETWORKS.ethereum];
       this.ethereumProvider = new ethers.JsonRpcProvider(endpoint);
     }
     return this.ethereumProvider;
@@ -57,7 +62,7 @@ class BalanceService {
     });
   }
 
-  // Fetch Solana balance
+  // Fetch Solana balance with RPC fallback
   async getSolanaBalance(address) {
     try {
       const cacheKey = this.getCacheKey(address, 'SOL');
@@ -67,9 +72,18 @@ class BalanceService {
         return this.getFromCache(cacheKey);
       }
 
-      const connection = this.initSolana();
+      const endpoints = NETWORK_CONFIG.solana[ACTIVE_NETWORKS.solana];
       const publicKey = new PublicKey(address);
-      const balance = await connection.getBalance(publicKey);
+
+      const balance = await rpcEndpointManager.executeWithFallback(
+        'solana',
+        endpoints,
+        async (endpoint) => {
+          const connection = new Connection(endpoint, 'confirmed');
+          return await connection.getBalance(publicKey);
+        }
+      );
+
       const solBalance = lamportsToSol(balance);
 
       // Cache the result
@@ -78,11 +92,11 @@ class BalanceService {
       return solBalance;
     } catch (error) {
       console.error('Error fetching Solana balance:', error);
-      throw new Error('Failed to fetch Solana balance');
+      return null;
     }
   }
 
-  // Fetch Ethereum balance
+  // Fetch Ethereum balance with RPC fallback
   async getEthereumBalance(address) {
     try {
       const cacheKey = this.getCacheKey(address, 'ETH');
@@ -92,8 +106,17 @@ class BalanceService {
         return this.getFromCache(cacheKey);
       }
 
-      const provider = this.initEthereum();
-      const balance = await provider.getBalance(address);
+      const endpoints = NETWORK_CONFIG.ethereum[ACTIVE_NETWORKS.ethereum];
+
+      const balance = await rpcEndpointManager.executeWithFallback(
+        'ethereum',
+        endpoints,
+        async (endpoint) => {
+          const provider = new ethers.JsonRpcProvider(endpoint);
+          return await provider.getBalance(address);
+        }
+      );
+
       const ethBalance = weiToEth(balance);
 
       // Cache the result
@@ -102,11 +125,11 @@ class BalanceService {
       return ethBalance;
     } catch (error) {
       console.error('Error fetching Ethereum balance:', error);
-      throw new Error('Failed to fetch Ethereum balance');
+      return null;
     }
   }
 
-  // Fetch Bitcoin balance
+  // Fetch Bitcoin balance with RPC fallback
   async getBitcoinBalance(address) {
     try {
       const cacheKey = this.getCacheKey(address, 'BTC');
@@ -116,15 +139,22 @@ class BalanceService {
         return this.getFromCache(cacheKey);
       }
 
-      // Use Blockstream API for Bitcoin balance
-      const endpoint = NETWORK_CONFIG.bitcoin[ACTIVE_NETWORKS.bitcoin];
-      const response = await fetch(`${endpoint}/address/${address}`);
+      const endpoints = NETWORK_CONFIG.bitcoin[ACTIVE_NETWORKS.bitcoin];
 
-      if (!response.ok) {
-        throw new Error('Failed to fetch Bitcoin balance from API');
-      }
+      const data = await rpcEndpointManager.executeWithFallback(
+        'bitcoin',
+        endpoints,
+        async (endpoint) => {
+          const response = await fetch(`${endpoint}/address/${address}`);
 
-      const data = await response.json();
+          if (!response.ok) {
+            throw new Error(`HTTP ${response.status}: Failed to fetch Bitcoin balance from API`);
+          }
+
+          return await response.json();
+        }
+      );
+
       const balance = data.chain_stats.funded_txo_sum - data.chain_stats.spent_txo_sum;
       const btcBalance = satoshisToBtc(balance);
 
@@ -134,7 +164,7 @@ class BalanceService {
       return btcBalance;
     } catch (error) {
       console.error('Error fetching Bitcoin balance:', error);
-      throw new Error('Failed to fetch Bitcoin balance');
+      return null;
     }
   }
 
@@ -161,17 +191,23 @@ class BalanceService {
     }
   }
 
-  // Fetch Solana SPL token balance
+  // Fetch Solana SPL token balance with RPC fallback
   async getSolanaTokenBalance(address, mintAddress) {
     try {
-      const connection = this.initSolana();
+      const endpoints = NETWORK_CONFIG.solana[ACTIVE_NETWORKS.solana];
       const publicKey = new PublicKey(address);
       const mintPublicKey = new PublicKey(mintAddress);
 
-      // Get token accounts for this wallet
-      const tokenAccounts = await connection.getParsedTokenAccountsByOwner(publicKey, {
-        mint: mintPublicKey,
-      });
+      const tokenAccounts = await rpcEndpointManager.executeWithFallback(
+        'solana',
+        endpoints,
+        async (endpoint) => {
+          const connection = new Connection(endpoint, 'confirmed');
+          return await connection.getParsedTokenAccountsByOwner(publicKey, {
+            mint: mintPublicKey,
+          });
+        }
+      );
 
       if (tokenAccounts.value.length === 0) {
         return 0; // No token account found
@@ -191,16 +227,22 @@ class BalanceService {
     }
   }
 
-  // Fetch ERC-20 token balance
+  // Fetch ERC-20 token balance with RPC fallback
   async getERC20Balance(address, contractAddress, decimals) {
     try {
-      const provider = this.initEthereum();
-
-      // ERC-20 balanceOf ABI
+      const endpoints = NETWORK_CONFIG.ethereum[ACTIVE_NETWORKS.ethereum];
       const abi = ['function balanceOf(address owner) view returns (uint256)'];
-      const contract = new ethers.Contract(contractAddress, abi, provider);
 
-      const balance = await contract.balanceOf(address);
+      const balance = await rpcEndpointManager.executeWithFallback(
+        'ethereum',
+        endpoints,
+        async (endpoint) => {
+          const provider = new ethers.JsonRpcProvider(endpoint);
+          const contract = new ethers.Contract(contractAddress, abi, provider);
+          return await contract.balanceOf(address);
+        }
+      );
+
       const tokenBalance = Number(balance) / Math.pow(10, decimals);
 
       return tokenBalance;
